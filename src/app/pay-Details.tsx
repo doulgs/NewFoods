@@ -8,7 +8,6 @@ import { useFocusEffect } from "expo-router";
 import { formatDateTime } from "@/utils/dateFormatter";
 import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { usePaymentCalculationStore } from "@/storages/usePaymentCalculationStore";
-import { usePreviousRouteName } from "@/hooks/useNavigationStateFoods";
 import { useRequestStore } from "@/storages/useRequestStore";
 import { fetchDetailOrder } from "@/services/Pedido/fetchDetailOrder";
 import { startTable } from "@/services/Mesas/startTable";

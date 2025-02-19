@@ -39,12 +39,10 @@ export function dbo_Usuario() {
   }
 
   // Deletar um usuário pelo Handle
-  async function deleteUsuario({ Handle }: Usuario) {
+  async function deleteUsuario() {
     try {
-      const statement = database.prepareSync(`
-        DELETE FROM usuario WHERE Handle = ?;
-      `);
-      statement.executeSync([Handle]);
+      await database.execAsync("DELETE FROM usuario");
+      await database.execAsync("DELETE FROM sqlite_sequence WHERE name = 'usuario';");
 
       console.log("Usuário --> Registro deletado com sucesso!");
     } catch (error) {

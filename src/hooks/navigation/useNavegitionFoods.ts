@@ -11,7 +11,17 @@ const useNavigationFoods = () => {
   const navigationController = useRouter();
 
   // Rotas de Autenticação
-  const navigateToLogin = () => navigationController.push("/");
+  const navigateToLogin = ({ reset = false }: { reset?: boolean } = {}) => {
+    if (reset) {
+      // Substitui a tela anterior, impedindo voltar
+      console.log("Resetando a navegação");
+      navigationController.replace("/");
+      return;
+    } else {
+      // Apenas adiciona à pilha de navegação
+      navigationController.push("/");
+    }
+  };
   const navigateToRegister = () => navigationController.push("/auth-Register");
 
   // Rotas Principais (Drawer)

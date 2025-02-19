@@ -1,6 +1,14 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
+const { wrapWithReanimatedMetroConfig } = require("react-native-reanimated/metro-config");
 
-const config = getDefaultConfig(__dirname);
+// Obtém a configuração padrão do Metro
+let config = getDefaultConfig(__dirname);
 
-module.exports = withNativeWind(config, { input: "./src/styles/global.css" });
+// Aplica NativeWind
+config = withNativeWind(config, { input: "./src/styles/global.css" });
+
+// Aplica React Native Reanimated
+config = wrapWithReanimatedMetroConfig(config);
+
+module.exports = config;
