@@ -1,7 +1,7 @@
 import { Background } from "@/components/Backgrounds";
 import { CustomButton } from "@/components/Buttons/CustomButton";
 import { Input } from "@/components/Inputs/Input";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { useUrlApiStore } from "@/storages/useUrlApiStorage";
 import { AntDesign } from "@expo/vector-icons";
 import { yupResolver } from "@hookform/resolvers/yup";

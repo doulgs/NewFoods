@@ -3,7 +3,7 @@ import { statusSelected, ToggleButtons } from "@/components/Buttons/ToggleButton
 import { Keyboard } from "@/components/Inputs/Keyboard";
 import { LoadingScreen } from "@/components/Loadings";
 import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { startCard } from "@/services/Cartoes/startTable";
 import { startTable } from "@/services/Mesas/startTable";
 import { getDisponibilidadeMesaCartao } from "@/services/Status/getDisponibilidadeMesaCartao";
@@ -96,6 +96,8 @@ export default function PanelMain() {
   };
 
   const startLaunch = async ({ handleGarcom, numero, tipo }: StartLaucherProps) => {
+    clearPedido();
+    clearSelectedPessoa();
     resetRequestStatus();
 
     if (currentValue === "0") {

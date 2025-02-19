@@ -1,10 +1,11 @@
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { usePedidoStore } from "@/storages/usePedidoStore";
 import { useProdutoStorage } from "@/storages/useProdutoStorage";
 import { formatToCurrency } from "@/utils/formatToCurrency";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import clsx from "clsx";
+import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { SectionList, Text, TouchableOpacity, View } from "react-native";
 
@@ -20,7 +21,12 @@ export default function LaucherExceptionList() {
   const route = useRoute();
   const { navigationController } = useNavigationFoods();
   const { produtosExcecoes, grupo2 } = useProdutoStorage(); // Obtendo o storage dos produtos
-  const { idPedido, HandleItem, HandleGrupo2 } = route.params as ExcecaoScreenParams;
+
+  const { idPedido, HandleItem, HandleGrupo2 } = useLocalSearchParams<{
+    idPedido: string;
+    HandleItem: string;
+    HandleGrupo2: string;
+  }>();
 
   const updateListaExcecoes = usePedidoStore((state) => state.updateListaExcecoes); // Método do Zustand
 
@@ -32,10 +38,14 @@ export default function LaucherExceptionList() {
   // Agrupar exceções por GrupoExcecao
   const getGroupedExcecoes = () => {
     const filteredExcecoes = [
-      // Filtrar exceções de produtosExcecoes e grupo2 com base no HandleItem e HandleGrupo2
-      ...produtosExcecoes.filter((ex) => ex.HandleItem === HandleItem),
+      // Filtrar exceções de produtosExcecoes com base no HandleItem
+      ...produtosExcecoes.filter((ex) => {
+        // Se ex.HandleItem for null, a conversão retornará "null", logo o filtro falha
+        return String(ex.HandleItem) === HandleItem;
+      }),
+      // Filtrar exceções do grupo2 com base no HandleGrupo2
       ...(grupo2
-        .find((g) => g.Handle === HandleGrupo2)
+        .find((g) => String(g.Handle) === HandleGrupo2)
         ?.Excecoes.map((ex) => ({
           Handle: ex.Handle,
           Nome: ex.Nome,
@@ -44,7 +54,7 @@ export default function LaucherExceptionList() {
           Quantidade: ex.Quantidade,
           Mark: ex.Mark,
           GrupoExcecao: ex.GrupoExcecao,
-          HandleItem: null, // Para manter consistência com ProdutosExcecoes
+          HandleItem: null, // Para manter consistência com produtosExcecoes
           HabilitaQuantidade: false, // Adicionado para consistência
         })) || []),
     ];
@@ -55,10 +65,10 @@ export default function LaucherExceptionList() {
       if (!acc[groupHandle]) {
         acc[groupHandle] = {
           title: ex.GrupoExcecao.Descricao,
-          data: [] as ProdutosExcecoes[], // Tipagem explícita para garantir consistência
+          data: [] as ProdutosExcecoes[],
         };
       }
-      acc[groupHandle].data.push(ex as ProdutosExcecoes); // Cast explícito para garantir compatibilidade
+      acc[groupHandle].data.push(ex as ProdutosExcecoes);
       return acc;
     }, {} as { [key: number]: { title: string; data: ProdutosExcecoes[] } });
 

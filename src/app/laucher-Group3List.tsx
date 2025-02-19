@@ -1,5 +1,5 @@
 import { PublisoftIcon } from "@/assets/icons/publisoft";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { useProdutoStorage } from "@/storages/useProdutoStorage";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";

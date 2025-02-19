@@ -6,7 +6,7 @@ import { formatToCurrency } from "@/utils/formatToCurrency";
 import { dbo_DetalhesPedido } from "@/database/schemas/dbo_DetalhesPedido";
 import { useFocusEffect } from "expo-router";
 import { formatDateTime } from "@/utils/dateFormatter";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { usePaymentCalculationStore } from "@/storages/usePaymentCalculationStore";
 import { usePreviousRouteName } from "@/hooks/useNavigationStateFoods";
 import { useRequestStore } from "@/storages/useRequestStore";

@@ -1,10 +1,8 @@
 import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
-import { getProdutosOptions } from "@/services/sincronizar/GetProdutos";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { PedidoItem, usePedidoStore } from "@/storages/usePedidoStore";
 import { useProdutoStorage } from "@/storages/useProdutoStorage";
 import { formatToCurrency } from "@/utils/formatToCurrency";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
@@ -16,7 +14,6 @@ type FormValues = {
 };
 
 export default function LaucherProductList() {
-  const route = useRoute();
   const { navigationController } = useNavigationFoods();
 
   const { getUsuario } = dbo_Usuario();

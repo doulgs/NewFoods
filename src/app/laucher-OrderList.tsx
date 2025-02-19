@@ -1,5 +1,5 @@
 import { LoadingScreen } from "@/components/Loadings";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { saveOrder } from "@/services/Pedido/saveOrder";
 import { fetchGrupo2 } from "@/services/sincronizar/GetGrupos2";
 import { getProdutos } from "@/services/sincronizar/GetProdutos";
@@ -7,7 +7,6 @@ import { Pedido, usePedidoStore } from "@/storages/usePedidoStore";
 import { useProdutoStorage } from "@/storages/useProdutoStorage";
 import { formatToCurrency } from "@/utils/formatToCurrency";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { clsx } from "clsx";
 import React, { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -214,7 +213,7 @@ export default function LaucherOrderList() {
         });
 
         ToastAndroid.show("Pedido salvo com sucesso!", ToastAndroid.SHORT);
-        navigateToMainScreen();
+        navigateToMainScreen({ reset: true });
       } else {
         Alert.alert("Erro", "O pedido não foi salvo. Verifique os dados e tente novamente.");
       }
@@ -500,12 +499,6 @@ export default function LaucherOrderList() {
             opacity: !showSearchAction && !showMenuActions ? 1 : 0,
           }}
         >
-          {/*           <TouchableOpacity
-            className={clsx("border rounded-lg p-2 bg-yellow-600")}
-            onPress={() => navigateToMainScreen(true)}
-          >
-            <Text className="text-lg px-4 font-semibold text-white">Abandonar Pedido</Text>
-          </TouchableOpacity> */}
           <TouchableOpacity
             className={clsx("border rounded-lg p-2", {
               "bg-zinc-700": pedidoItens.length === 0,

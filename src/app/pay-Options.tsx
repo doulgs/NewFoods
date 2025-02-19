@@ -1,7 +1,7 @@
 import { LoadingScreen } from "@/components/Loadings";
 import { KeyboardModal } from "@/components/Modais/KeyboardModal";
 import { dbo_DetalhesPedido } from "@/database/schemas/dbo_DetalhesPedido";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { handlePaymentProcess } from "@/modules/Payment/PaymentModuleController";
 import { fetchConditions } from "@/services/Condicoes/fetchConditions";
 import { InsertPayment } from "@/services/Pedido/insertPayment";

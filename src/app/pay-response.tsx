@@ -1,6 +1,6 @@
 import { LoadingScreen } from "@/components/Loadings";
 import { printPaymentReceipt } from "@/hooks/printPaymentReceipt";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import React, { useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { dbo_DetalhesPedido } from "@/database/schemas/dbo_DetalhesPedido";

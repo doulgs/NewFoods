@@ -9,7 +9,7 @@ import { DropdownComponent, DropdownItem } from "@/components/Inputs/DropdownCom
 import { Input } from "@/components/Inputs/Input";
 import { LoadingScreen } from "@/components/Loadings";
 import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { fetchGarcom } from "@/services/Garcom/fetchGarcom";
 import { performAccess } from "@/services/Garcom/performAccess";
 import { useUrlApiStore } from "@/storages/useUrlApiStorage";

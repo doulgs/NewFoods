@@ -1,6 +1,6 @@
 import { PublisoftIcon } from "@/assets/icons/publisoft";
 import { LoadingScreen } from "@/components/Loadings";
-import { useNavigationFoods } from "@/hooks/useNavegitionFoods";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { fetchGrupo3 } from "@/services/sincronizar/GetGrupos3";
 import { useProdutoStorage } from "@/storages/useProdutoStorage";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 
 export default function LaucherGroup2List() {
   const { navigateToGroup3List, navigateToProductList } = useNavigationFoods();
-  const { grupo2, setGrupo3, clearStorage } = useProdutoStorage();
+  const { grupo2, setGrupo3 } = useProdutoStorage();
 
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState("Codigo"); // Opção de ordenação
@@ -28,7 +28,6 @@ export default function LaucherGroup2List() {
     try {
       setIsLoading(true);
       if (item.EhComposicao) {
-        clearStorage(); // Limpar cache dos grupos3
         const grupo3list = await fetchGrupo3({ handleGrupo2: item.Handle });
         if (grupo3list) {
           setGrupo3(grupo3list.Data.Grupos3);
