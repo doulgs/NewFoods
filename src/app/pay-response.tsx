@@ -16,7 +16,7 @@ export default function PayResponse() {
 
     if (!ultimaParcelaInserida) return;
 
-    if (ultimaParcelaInserida.Atk === "DIN") {
+    if (ultimaParcelaInserida.Atk === "DIN" || ultimaParcelaInserida.Atk === "") {
       await printPaymentReceipt(ultimaParcelaInserida);
     }
     return null;
@@ -28,7 +28,7 @@ export default function PayResponse() {
 
     const timer = setTimeout(() => {
       if (type === "finish") {
-        navigateToMainScreen({ reset: true });
+        navigationController.dismissTo("/panel-Main");
       } else {
         navigationController.dismissTo("/pay-Details");
       }

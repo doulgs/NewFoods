@@ -173,8 +173,6 @@ export default function PayOptions() {
 
       const isFinishOrder: "Total" | "Crédito" = valorTotalPendente === valorPendente ? "Total" : "Crédito";
 
-      console.log(isFinishOrder);
-
       if (!selectedCondition) {
         Alert.alert("Sistema", "Condição de pagamento não encontrada. Tente novamente.");
         return;

@@ -97,3 +97,16 @@ interface CondicaoPagamento {
   CodigoIntegracaoPagamento: string;
   Tabela: string | null;
 }
+
+interface TempMesaCartao {
+  Numero: string;
+  Nome: string;
+  TempoInatividade: string;
+  SolicitouConta: boolean;
+  HorarioUltimaAlteracao: string;
+  Inatividade: boolean;
+  Status: string;
+  NumeroMesa?: number; // Opcional, pois pode ser apenas para mesas
+  QuantidadePessoas: number;
+  GpeHandle: number;
+}

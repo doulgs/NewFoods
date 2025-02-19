@@ -111,8 +111,6 @@ export default function PanelMain() {
     try {
       const disponibilidade = await getDisponibilidadeMesaCartao({ numero: numeroDigitado, tipo });
 
-      console.log(disponibilidade, handleGarcom, numero, tipo);
-
       if (disponibilidade) {
         if (selectedType === "mesa") {
           await iniciarMesa(handleGarcom, numeroDigitado);

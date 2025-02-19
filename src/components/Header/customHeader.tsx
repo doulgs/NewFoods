@@ -64,7 +64,7 @@ export function CustomHeader({ back, navigation, options, route }: NativeStackHe
       </View>
 
       {/* BottomSheet Component */}
-      <BottomSheet ref={bottomSheetRef} snapPoints={["39%"]} initialIndex={0}>
+      <BottomSheet ref={bottomSheetRef} snapPoints={["45%", "55%", "65%", "75%", "100%"]} initialIndex={0}>
         <View className="flex-1 px-6 gap-3">
           <Text className="text-white text-2xl font-extraBold">Consultar Paineis</Text>
           <TouchableOpacity

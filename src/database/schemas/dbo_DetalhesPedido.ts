@@ -163,7 +163,7 @@ export function dbo_DetalhesPedido() {
         ]);
       });
 
-      console.log("✅ Detalhes do pedido, itens, composições, detalhes e pagamentos foram salvos com sucesso!");
+      //console.log("✅ Detalhes do pedido, itens, composições, detalhes e pagamentos foram salvos com sucesso!");
     } catch (error) {
       console.error("❌ Erro ao salvar detalhes do pedido:", error);
       throw error;
