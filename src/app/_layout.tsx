@@ -1,5 +1,6 @@
 import "../styles/global.css";
 
+import { CustomHeader } from "@/components/Header/customHeader";
 import { database } from "@/database/database";
 import {
   Quicksand_400Regular,
@@ -77,6 +78,7 @@ export default function Layout() {
                 name="panel-Main"
                 options={{
                   title: "QuickFoods",
+                  header: (props) => <CustomHeader {...props} />,
                 }}
               />
 
