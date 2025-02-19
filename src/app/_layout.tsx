@@ -1,3 +1,4 @@
+import { CustomHeader } from "@/components/Header/customHeader";
 import "../styles/global.css";
 
 import { database } from "@/database/database";
@@ -71,7 +72,13 @@ export default function Layout() {
 
             <Stack.Screen name="panel-ListCards" options={{ title: "Painel de Cartões" }} />
             <Stack.Screen name="panel-ListTables" options={{ title: "Painel de Mesas" }} />
-            <Stack.Screen name="panel-Main" options={{ title: "QuickFoods", headerTitleAlign: "center" }} />
+            <Stack.Screen
+              name="panel-Main"
+              options={{
+                title: "QuickFoods",
+                header: (props) => <CustomHeader {...props} />,
+              }}
+            />
 
             <Stack.Screen name="pay-Details" options={{ title: "Detalhes do Pedido" }} />
             <Stack.Screen name="pay-Options" options={{ title: "Pagamento" }} />
