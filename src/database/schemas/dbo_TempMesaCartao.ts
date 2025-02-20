@@ -10,6 +10,8 @@ export function dbo_TempMesaCartao() {
     try {
       // Remover o registro existente antes de inserir um novo
       await database.execAsync(`DELETE FROM temp_mesa_cartao`);
+      // Resetar o contador de auto incremento
+      await database.execAsync("DELETE FROM sqlite_sequence WHERE name = 'temp_mesa_cartao';");
 
       const statement = database.prepareSync(`
         INSERT INTO temp_mesa_cartao 

@@ -1,12 +1,13 @@
 import { LoadingScreen } from "@/components/Loadings";
+import { dbo_Configuracoes } from "@/database/schemas/dbo_Configuracoes";
 import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
 import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { PedidoItem, usePedidoStore } from "@/storages/usePedidoStore";
 import { useProdutoStorage } from "@/storages/useProdutoStorage";
 import { formatToCurrency } from "@/utils/formatToCurrency";
 import { FlashList } from "@shopify/flash-list";
-import { useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -18,6 +19,7 @@ export default function LaucherProductList() {
   const { navigationController } = useNavigationFoods();
 
   const { getUsuario } = dbo_Usuario();
+  const { getConfig } = dbo_Configuracoes();
 
   const { produtos } = useProdutoStorage();
   const { handleGrupo2, handleGrupo3, searchNomeProduto } = useLocalSearchParams<{
@@ -37,13 +39,37 @@ export default function LaucherProductList() {
   const [sortOption, setSortOption] = useState("Codigo");
   const [isLoading, setIsLoading] = useState<boolean>(false); // Estado de carregamento
   const [incrementStep, setIncrementStep] = useState(1); // Opções Disponiveis "1" | "0.1" | "0.01" | "0.001"
+  const [config, setConfig] = useState<ResultConfigData>({} as ResultConfigData);
 
   const infoPedido = usePedidoStore((state) => state.pedido);
   const addPedidoItem = usePedidoStore((state) => state.addPedidoItem);
 
-  /*   const grupo2ComQuantidade = config.Grupo2ComQuantidadeMultiSelect
-    ? config.Grupo2ComQuantidadeMultiSelect.split(",").map((id) => Number(id))
-    : []; */
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      async function fetch() {
+        setIsLoading(true);
+        try {
+          if (!isActive) return;
+          const result = await getConfig();
+          setConfig(result);
+        } catch (error) {
+          console.error("Erro ao buscar configs:", error);
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+
+      fetch();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
 
   const filterAndSortProductList = () => {
     const _handleGrupo2 = Number(handleGrupo2);
@@ -191,8 +217,6 @@ export default function LaucherProductList() {
         estimatedItemSize={100}
         renderItem={({ item }) => {
           const isSelected = selectedItems[item.Handle] !== undefined;
-          //const canAdjustQuantity = grupo2ComQuantidade.includes(item.HandleGrupo2);
-
           return (
             <TouchableOpacity
               className={`bg-gray-100 m-3 rounded-lg border shadow-md p-4 ${
@@ -209,42 +233,44 @@ export default function LaucherProductList() {
                 </Text>
               </View>
 
-              {isSelected && (
-                <Controller
-                  control={control}
-                  name="selectedItems"
-                  render={({ field }) => (
-                    <View className="flex-1 flex-row items-center border rounded-lg overflow-hidden mt-4 bg-gray-200">
-                      {/* Botão de Decrementar */}
-                      <TouchableOpacity
-                        onPress={() => updateQuantity(item.Handle, -1, field.value?.[item.Handle]?.toString())}
-                        className="bg-red-500 w-12 h-12 items-center justify-center"
-                      >
-                        <Text className="text-white font-bold text-xl">-</Text>
-                      </TouchableOpacity>
+              {isSelected &&
+                // Se o produto permite ajuste de quantidade, mostra os botões
+                config?.Grupo2ComQuantidadeMultiSelect?.includes(item.HandleGrupo2) && (
+                  <Controller
+                    control={control}
+                    name="selectedItems"
+                    render={({ field }) => (
+                      <View className="flex-1 flex-row items-center border rounded-lg overflow-hidden mt-4 bg-gray-200">
+                        {/* Botão de Decrementar */}
+                        <TouchableOpacity
+                          onPress={() => updateQuantity(item.Handle, -1, field.value?.[item.Handle]?.toString())}
+                          className="bg-red-500 w-12 h-12 items-center justify-center"
+                        >
+                          <Text className="text-white font-bold text-xl">-</Text>
+                        </TouchableOpacity>
 
-                      {/* Quantidade Centralizada */}
-                      <TextInput
-                        className="flex-1 text-center text-xl font-bold text-gray-700 py-2"
-                        keyboardType="numeric"
-                        value={field.value?.[item.Handle]?.toString().slice(0, 5) || "0"} // Exibe apenas 3 caracteres
-                        onChangeText={(text) => {
-                          const validText = text.replace(/[^0-9.]/g, "").slice(0, 5); // Limita a 3 caracteres
-                          field.onChange({ ...field.value, [item.Handle]: validText }); // Atualiza o estado
-                        }}
-                      />
+                        {/* Exibição da quantidade */}
+                        <TextInput
+                          className="flex-1 text-center text-xl font-bold text-gray-700 py-2"
+                          keyboardType="numeric"
+                          value={field.value?.[item.Handle]?.toString().slice(0, 5) || "0"}
+                          onChangeText={(text) => {
+                            const validText = text.replace(/[^0-9.]/g, "").slice(0, 5);
+                            field.onChange({ ...field.value, [item.Handle]: validText });
+                          }}
+                        />
 
-                      {/* Botão de Incrementar */}
-                      <TouchableOpacity
-                        onPress={() => updateQuantity(item.Handle, 1, field.value?.[item.Handle]?.toString())}
-                        className="bg-green-500 w-12 h-12 items-center justify-center"
-                      >
-                        <Text className="text-white font-bold text-xl">+</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                />
-              )}
+                        {/* Botão de Incrementar */}
+                        <TouchableOpacity
+                          onPress={() => updateQuantity(item.Handle, 1, field.value?.[item.Handle]?.toString())}
+                          className="bg-green-500 w-12 h-12 items-center justify-center"
+                        >
+                          <Text className="text-white font-bold text-xl">+</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                )}
             </TouchableOpacity>
           );
         }}

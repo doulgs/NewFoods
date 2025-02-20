@@ -2,6 +2,7 @@ import { PublisoftIcon } from "@/assets/icons/publisoft";
 import { statusSelected, ToggleButtons } from "@/components/Buttons/ToggleButtons";
 import { Keyboard } from "@/components/Inputs/Keyboard";
 import { LoadingScreen } from "@/components/Loadings";
+import { dbo_Configuracoes } from "@/database/schemas/dbo_Configuracoes";
 import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
 import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { startCard } from "@/services/Cartoes/startTable";
@@ -9,7 +10,8 @@ import { startTable } from "@/services/Mesas/startTable";
 import { getDisponibilidadeMesaCartao } from "@/services/Status/getDisponibilidadeMesaCartao";
 import { usePedidoStore } from "@/storages/usePedidoStore";
 import { useRequestStore } from "@/storages/useRequestStore";
-import React, { useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { Alert, Text, View } from "react-native";
 
 interface StartLaucherProps {
@@ -22,6 +24,7 @@ export default function PanelMain() {
   const { navigateToDetailPayment, navigateToOrderList } = useNavigationFoods();
 
   const { getUsuario } = dbo_Usuario();
+  const { getConfig } = dbo_Configuracoes();
 
   const { setRequestData, resetRequestStatus } = useRequestStore();
   const { setPedido, clearPedido, clearSelectedPessoa } = usePedidoStore();
@@ -29,6 +32,34 @@ export default function PanelMain() {
   const [currentValue, setCurrentValue] = useState<string>("0"); // Valor atual do teclado
   const [isLoading, setIsLoading] = useState<boolean>(false); // Estado de carregamento
   const [selectedType, setSelectedType] = useState<statusSelected>("mesa");
+  const [config, setConfig] = useState<ResultConfigData>({} as ResultConfigData);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      async function fetch() {
+        setIsLoading(true);
+        try {
+          if (!isActive) return;
+          const result = await getConfig();
+          setConfig(result);
+        } catch (error) {
+          console.error("Erro ao buscar configs:", error);
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+
+      fetch();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
 
   // Função chamada quando o usuário troca entre "mesa" e "cartão"
   const handleToggle = (value: statusSelected) => {
@@ -141,7 +172,7 @@ export default function PanelMain() {
     <View className="flex-1 bg-white">
       {/* Componente ToggleButtons */}
       <View className="p-4 py-6 border-b-2 border-gray-300">
-        <ToggleButtons onSelect={(v) => handleToggle(v)} lancamentoLiberado="Ambos" />
+        <ToggleButtons onSelect={(v) => handleToggle(v)} lancamentoLiberado={config.lancamentoLiberado} />
       </View>
 
       {/* Exibe a opção selecionada e o valor atual */}

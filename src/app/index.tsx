@@ -15,6 +15,8 @@ import { performAccess } from "@/services/Garcom/performAccess";
 import { useUrlApiStore } from "@/storages/useUrlApiStorage";
 import { useFocusEffect } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { dbo_Configuracoes } from "@/database/schemas/dbo_Configuracoes";
+import { fetchConfig } from "@/services/Parametros/fetchConfig";
 
 type FormValues = {
   selectedItem: DropdownItem;
@@ -29,6 +31,7 @@ const schema = yup.object().shape({
 export default function Index() {
   const { navigateToRegister, navigateToMainScreen } = useNavigationFoods();
   const { insertUsuario } = dbo_Usuario();
+  const { insertConfig } = dbo_Configuracoes();
   const [listUsers, setListUsers] = useState<DropdownItem[]>([]);
   const [isLoadingScreen, setIsLoadingScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +94,15 @@ export default function Index() {
         navigateToRegister();
         return;
       }
+
+      const config = await fetchConfig();
+      console.log(config);
+      if (!config) {
+        Alert.alert("Sistema", "Não foi possível buscar as configurações. Verifique a conexão com a internet");
+        return;
+      }
+
+      await insertConfig(config);
 
       const result = await fetchGarcom();
       if (!result || !result.IsValid) {

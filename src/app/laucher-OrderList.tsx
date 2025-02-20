@@ -1,4 +1,5 @@
 import { LoadingScreen } from "@/components/Loadings";
+import { dbo_Configuracoes } from "@/database/schemas/dbo_Configuracoes";
 import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { saveOrder } from "@/services/Pedido/saveOrder";
 import { fetchGrupo2 } from "@/services/sincronizar/GetGrupos2";
@@ -35,6 +36,8 @@ export default function LaucherOrderList() {
   const { produtos, setGrupo2, setProdutos, setProdutosExcecoes, setProdutoExcAuto, setComboItems, clearStorage } =
     useProdutoStorage();
 
+  const { getConfig } = dbo_Configuracoes();
+
   const {
     navigateToProductList,
     navigateToExceptionList,
@@ -54,6 +57,7 @@ export default function LaucherOrderList() {
   const [isLoading, setIsLoading] = useState(false); // Estado para controlar o loading
   const [showMenuActions, setShowMenuActions] = useState(false); // Estado para controlar o card
   const [showSearchAction, setShowSearchAction] = useState(false); // Estado para controlar o card
+  const [config, setConfig] = useState<ResultConfigData>({} as ResultConfigData);
 
   const onSubmitSearchProduct: SubmitHandler<FormData> = async (data) => {
     try {
@@ -72,29 +76,37 @@ export default function LaucherOrderList() {
   const onSubmitAction: SubmitHandler<FormData> = (data) => {
     // Filtrar e transformar os dados para o tipo correto
     const updatedFields = Object.entries({
-      QtdPessoasMesa: data.qtdPessoas ? Number(data.qtdPessoas) : undefined, // Converte para número, se fornecido
-      Observacao: data.observacoes?.trim() || undefined, // Remove espaços extras
-      NumeroMesaCartao: data.numeroMesaCartao ? parseInt(data.numeroMesaCartao) : undefined, // Converte para número, se fornecido
+      QtdPessoasMesa: data.qtdPessoas ? Number(data.qtdPessoas) : undefined,
+      Observacao: data.observacoes?.trim() || undefined,
+      NumeroMesaCartao: data.numeroMesaCartao ? parseInt(data.numeroMesaCartao) : undefined,
     }).reduce((acc, [key, value]) => {
       if (value !== undefined) {
-        acc[key as keyof Pedido] = value as never; // Força o tipo corretamente
+        acc[key as keyof Pedido] = value as never;
       }
       return acc;
     }, {} as Partial<Pedido>);
 
-    // Atualiza os campos do pedido apenas se houver valores válidos
+    // Se o pedido for de cartão e se estiver configurado para usar o mesmo número,
+    // então atribuímos o valor do Número da Mesa Cartão também ao campo que representa o número da mesa
+    if (
+      pedido.tipoLancamento === "cartao" &&
+      config.UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao &&
+      updatedFields.NumeroMesaCartao
+    ) {
+      updatedFields.Numero = updatedFields.NumeroMesaCartao.toString();
+    }
+
+    // Atualiza os campos do pedido se houver valores válidos
     if (Object.keys(updatedFields).length > 0) {
       updatePedidoFields(updatedFields);
     }
     setShowMenuActions(false);
   };
 
-  // Alterna a visibilidade do card
   const toggleMenuActions = () => {
     setShowMenuActions((prev) => !prev);
   };
 
-  // Alterna a visibilidade do card
   const toggleSearchAction = () => {
     setShowSearchAction((prev) => !prev);
   };
@@ -120,12 +132,13 @@ export default function LaucherOrderList() {
     navigateToListPeople();
   }, []);
 
-  // Função para obter os produtos
   const loadingProductsList = async () => {
     setIsLoading(true); // Inicia o estado de carregamento
     clearStorage(); // Limpa o storage para evitar inconsistências
 
     try {
+      const result = await getConfig();
+      setConfig(result);
       // Funções auxiliares para carregar grupos e produtos
       const fetchGrupoData = async () => {
         const grupo = await fetchGrupo2();
@@ -168,50 +181,48 @@ export default function LaucherOrderList() {
       if (pedidoItens.length === 0) {
         Alert.alert(
           "Sistema",
-          "Não é possivel salvar um pedido que não contenha nenhum item.",
-          [
-            {
-              text: "Ok",
-              style: "cancel",
-            },
-          ],
+          "Não é possível salvar um pedido que não contenha nenhum item.",
+          [{ text: "Ok", style: "cancel" }],
           { cancelable: false }
         );
         return;
       }
 
-      //if (pedido.tipoLancamento === "cartao" && config.ObrigatorioNumeroMesaLancamentoCartao) {
-      if (pedido.tipoLancamento === "cartao") {
-        if (watch("numeroMesaCartao") === "" || watch("numeroMesaCartao") === "0") {
+      // Validação do campo do número da mesa para lançamentos cartão
+      if (pedido.tipoLancamento === "cartao" && config.ObrigatorioNumeroMesaLancamentoCartao) {
+        const numeroMesaCartaoStr = watch("numeroMesaCartao");
+        if (numeroMesaCartaoStr === "" || numeroMesaCartaoStr === "0") {
           Alert.alert(
             "Sistema",
             "É necessário preencher o número da mesa para lançamentos cartão.",
-            [
-              {
-                text: "Ok",
-                style: "cancel",
-              },
-            ],
+            [{ text: "Ok", style: "cancel" }],
             { cancelable: false }
           );
           return;
         }
       }
 
+      // Se o pedido for de cartão e se estiver configurado para usar o mesmo número,
+      // atualizamos o pedido para que o número seja o mesmo para ambos os campos.
+      if (pedido.tipoLancamento === "cartao" && config.UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao) {
+        const numeroMesaCartao = parseInt(watch("numeroMesaCartao"));
+        updatePedidoFields({
+          Numero: numeroMesaCartao.toString(),
+          NumeroMesaCartao: numeroMesaCartao,
+        });
+      }
+
       // Remover a propriedade 'id' de cada item do array
       const pedidoItensSemId = pedidoItens.map(({ id, ...resto }) => resto);
 
-      // Chamar a função saveOrder com os itens sem 'id'
       const isOrderSaved = await saveOrder(pedidoItensSemId);
 
-      // Se o retorno for `true`, executar o bloco
       if (isOrderSaved?.IsValid) {
         reset({
           qtdPessoas: 1,
           observacoes: "",
           numeroMesaCartao: "",
         });
-
         ToastAndroid.show("Pedido salvo com sucesso!", ToastAndroid.SHORT);
         navigateToMainScreen({ reset: true });
       } else {
@@ -242,6 +253,12 @@ export default function LaucherOrderList() {
                 {pedido.tipoLancamento.charAt(0).toUpperCase() + pedido.tipoLancamento.slice(1).toLowerCase()} #
                 {pedido.Numero || "?"}
               </Text>
+              {pedido.tipoLancamento === "mesa" && (
+                <Text className="text-lg font-bold text-gray-700">
+                  Quantidade de Pessoas:{" "}
+                  <Text className="text-lg font-extrabold text-gray-700">{pedido.QtdPessoasMesa}</Text>
+                </Text>
+              )}
               <Text className="text-lg font-bold text-gray-700">
                 Total Consumido:{" "}
                 <Text className="text-lg font-extrabold text-green-600">R$ {pedido.TotalConsumido.toFixed(2)}</Text>
@@ -355,33 +372,35 @@ export default function LaucherOrderList() {
                   </View>
 
                   {/* Número da Mesa */}
-                  <View className="mb-4">
-                    <Text className="text-lg font-bold text-gray-700 mb-2">Nº Mesa:</Text>
-                    <View className="flex-row gap-2">
-                      <Controller
-                        name="numeroMesaCartao"
-                        control={control}
-                        render={({ field: { value, onChange } }) => (
-                          <TextInput
-                            value={value}
-                            onChangeText={onChange}
-                            placeholder="Digite o número da mesa"
-                            keyboardType="numeric"
-                            className="flex-1 border p-2 rounded-md text-gray-700"
-                          />
-                        )}
-                      />
-                      <TouchableOpacity
-                        onPress={() => {
-                          updatePedidoFields({ NumeroMesaCartao: 0 }),
-                            setValue<"numeroMesaCartao">("numeroMesaCartao", "");
-                        }}
-                        className="border rounded-lg p-2 bg-red-500"
-                      >
-                        <Ionicons name="close" size={24} color="white" />
-                      </TouchableOpacity>
+                  {pedido.tipoLancamento === "cartao" && (
+                    <View className="mb-4">
+                      <Text className="text-lg font-bold text-gray-700 mb-2">Nº Mesa:</Text>
+                      <View className="flex-row gap-2">
+                        <Controller
+                          name="numeroMesaCartao"
+                          control={control}
+                          render={({ field: { value, onChange } }) => (
+                            <TextInput
+                              value={value}
+                              onChangeText={onChange}
+                              placeholder="Digite o número da mesa"
+                              keyboardType="numeric"
+                              className="flex-1 border p-2 rounded-md text-gray-700"
+                            />
+                          )}
+                        />
+                        <TouchableOpacity
+                          onPress={() => {
+                            updatePedidoFields({ NumeroMesaCartao: 0 }),
+                              setValue<"numeroMesaCartao">("numeroMesaCartao", "");
+                          }}
+                          className="border rounded-lg p-2 bg-red-500"
+                        >
+                          <Ionicons name="close" size={24} color="white" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
+                  )}
 
                   <View className="items-end">
                     <TouchableOpacity
@@ -439,10 +458,7 @@ export default function LaucherOrderList() {
           </>
         )}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            className={`bg-gray-100 mb-3 rounded-lg shadow-md p-4 border border-zinc-400`}
-            onPress={() => {}}
-          >
+          <View className={`bg-gray-100 mb-3 rounded-lg shadow-md p-4 border border-zinc-400`}>
             <View className="flex-row items-center justify-between mt-2">
               <Text className="flex-1 text-gray-800 font-bold text-lg pr-4" numberOfLines={2}>
                 {item.DescricaoItem}
@@ -489,7 +505,7 @@ export default function LaucherOrderList() {
                 </TouchableOpacity>
               </View>
             </View>
-          </TouchableOpacity>
+          </View>
         )}
       />
       {!showSearchAction && !showMenuActions && (

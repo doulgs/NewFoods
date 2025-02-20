@@ -13,10 +13,17 @@ interface Usuario {
 
 // Interface para configurações do sistema
 interface ConfigData {
-  id: number;
-  lancamentoLiberado: "Ambos" | "Cartão" | "Mesa";
-  Grupo2ComQuantidadeMultiSelect: string; // IDs separados por vírgula
-  UnidadeComQuantidadeFracionada: string; // Unidades separadas por vírgula
+  lancamentoLiberado: string;
+  Grupo2ComQuantidadeMultiSelect: string;
+  UnidadeComQuantidadeFracionada: string;
+  UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao: string;
+  ObrigatorioNumeroMesaLancamentoCartao: string;
+}
+
+interface ResultConfigData {
+  lancamentoLiberado: "Ambos" | "Mesa" | "Cartao";
+  Grupo2ComQuantidadeMultiSelect: Array<number>;
+  UnidadeComQuantidadeFracionada: Array<string>;
   UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao: boolean;
   ObrigatorioNumeroMesaLancamentoCartao: boolean;
 }

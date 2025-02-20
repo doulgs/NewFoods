@@ -7,6 +7,8 @@ export function dbo_Usuario() {
     try {
       // Primeiro, deletar todos os registros existentes
       await database.execAsync(`DELETE FROM usuario`);
+      // Resetar o contador de auto incremento
+      await database.execAsync("DELETE FROM sqlite_sequence WHERE name = 'usuario';");
 
       // Em seguida, inserir o novo registro
       const statement = database.prepareSync(`

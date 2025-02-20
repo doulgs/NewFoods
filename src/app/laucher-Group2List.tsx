@@ -85,7 +85,7 @@ export default function LaucherGroup2List() {
             onPress={() => handleItemPress(item)}
           >
             <View className="absolute top-2 left-2">
-              <Text className="text-xs font-bold text-gray-500">{item.Codigo}</Text>
+              <Text className="text-xs font-bold text-gray-500">{item.Handle}</Text>
             </View>
             <View className=" justify-between items-center p-1">
               <PublisoftIcon fill={"#044470"} />

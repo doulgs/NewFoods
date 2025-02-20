@@ -1,6 +1,5 @@
-/* import { handleAPIError } from "@/services/handleAPIError";
+import { handleAPIError } from "@/services/handleAPIError";
 import { useApiSettings } from "../api";
-import { ConfigData, useApiConfigStore } from "@/stores/useApiConfigStore";
 
 export type ResponseGetConfig = {
   IsValid: boolean;
@@ -8,7 +7,7 @@ export type ResponseGetConfig = {
   Data: ConfigData;
 };
 
-async function getApiConfig(): Promise<ResponseGetConfig | null> {
+async function fetchConfig(): Promise<ConfigData | null> {
   try {
     const { createAxiosInstance } = useApiSettings(); // Obtém as configurações do API
     const API = await createAxiosInstance(); // Cria a instância do Axios
@@ -19,18 +18,10 @@ async function getApiConfig(): Promise<ResponseGetConfig | null> {
       const data = response.data;
 
       if (data.IsValid && data.Data) {
-        // Salva os dados no Zustand, convertendo os booleanos para strings
-        const { setConfig } = useApiConfigStore.getState();
-
-        setConfig({
-          ...data.Data,
-          UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao:
-            data.Data.UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao.toString(),
-          ObrigatorioNumeroMesaLancamentoCartao: data.Data.ObrigatorioNumeroMesaLancamentoCartao.toString(),
-        });
+        return data.Data;
       }
 
-      return data;
+      return null;
     }
 
     // Se o status for diferente de sucesso, trata o erro
@@ -43,5 +34,4 @@ async function getApiConfig(): Promise<ResponseGetConfig | null> {
   }
 }
 
-export { getApiConfig };
- */
+export { fetchConfig };

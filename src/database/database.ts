@@ -15,11 +15,11 @@ export async function database(database: SQLiteDatabase) {
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS config (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        lancamentoLiberado TEXT CHECK(lancamentoLiberado IN ('Ambos', 'Cartão', 'Mesa')) NOT NULL DEFAULT 'Ambos',
+        lancamentoLiberado TEXT DEFAULT '',
         Grupo2ComQuantidadeMultiSelect TEXT DEFAULT '',
         UnidadeComQuantidadeFracionada TEXT DEFAULT '',
-        UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao INTEGER CHECK(UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao IN (0,1)) DEFAULT 0,
-        ObrigatorioNumeroMesaLancamentoCartao INTEGER CHECK(ObrigatorioNumeroMesaLancamentoCartao IN (0,1)) DEFAULT 0
+        UtilizarMesmoNumeroCartaoParaNumeroMesaNoCartao TEXT DEFAULT '',
+        ObrigatorioNumeroMesaLancamentoCartao TEXT DEFAULT ''
       );
     `);
 
