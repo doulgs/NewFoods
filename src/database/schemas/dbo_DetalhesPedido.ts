@@ -43,9 +43,9 @@ export function dbo_DetalhesPedido() {
         data.Pedido.HandleGarcom,
         data.Pedido.Total,
         data.Pedido.FoodsQtdPessoas,
-        data.Pedido.ValorDesconto,
-        data.Pedido.ValorAcrescimo,
-        data.Pedido.ValorOutros,
+        data.Pedido.ValorDesconto ?? 0,
+        data.Pedido.ValorAcrescimo ?? 0,
+        data.Pedido.ValorOutros ?? 0,
         data.Pedido.Tipo,
         data.Pedido.Nome,
         data.Pedido.SolicitouConta ? 1 : 0,
@@ -72,8 +72,8 @@ export function dbo_DetalhesPedido() {
           item.HandleGarcom,
           item.DescricaoItem ?? "",
           item.Quantidade,
-          item.Valor,
-          item.Total,
+          item.Valor ?? 0,
+          item.Total ?? 0,
           item.DescricaoExcecoes ?? "",
           item.NomeGrupo ?? "",
           item.NomeSabor ?? "",
@@ -95,7 +95,7 @@ export function dbo_DetalhesPedido() {
             item.HandleItem,
             composicao.HandleItem,
             composicao.DescricaoItem,
-            composicao.Valor,
+            composicao.Valor ?? 0,
             composicao.DescricaoExcecoes ?? "",
             composicao.NomeSabor ?? "",
           ]);
@@ -140,12 +140,12 @@ export function dbo_DetalhesPedido() {
           pagamento.Tabela,
           pagamento.Handle,
           pagamento.HandleCondicaoPagamento,
-          pagamento.ValorPago,
-          pagamento.ValorTroco,
-          pagamento.ValorAcrescimo,
-          pagamento.ValorOutros,
-          pagamento.ValorDesconto,
-          pagamento.ValorProdutos,
+          pagamento.ValorPago ?? 0,
+          pagamento.ValorTroco ?? 0,
+          pagamento.ValorAcrescimo ?? 0,
+          pagamento.ValorOutros ?? 0,
+          pagamento.ValorDesconto ?? 0,
+          pagamento.ValorProdutos ?? 0,
           pagamento.GpeHandleDestino ?? null,
           pagamento.Sequencia,
           pagamento.QuantidadePessoas,
@@ -223,7 +223,7 @@ export function dbo_DetalhesPedido() {
             id: comp.id, // ✅ Adicionando o id obrigatório
             HandleItem: comp.HandleItem,
             DescricaoItem: comp.DescricaoItem,
-            Valor: comp.Valor,
+            Valor: comp.Valor ?? 0,
             DescricaoExcecoes: comp.DescricaoExcecoes,
             NomeSabor: comp.NomeSabor,
           })),
@@ -280,12 +280,12 @@ export function dbo_DetalhesPedido() {
         payment.Tabela,
         payment.Handle,
         payment.HandleCondicaoPagamento,
-        payment.ValorPago,
-        payment.ValorTroco,
-        payment.ValorAcrescimo,
-        payment.ValorOutros,
-        payment.ValorDesconto,
-        payment.ValorProdutos,
+        payment.ValorPago ?? 0,
+        payment.ValorTroco ?? 0,
+        payment.ValorAcrescimo ?? 0,
+        payment.ValorOutros ?? 0,
+        payment.ValorDesconto ?? 0,
+        payment.ValorProdutos ?? 0,
         payment.GpeHandleDestino ?? null,
         payment.Sequencia,
         payment.QuantidadePessoas,
@@ -321,18 +321,22 @@ export function dbo_DetalhesPedido() {
         return null;
       }
       // Busca todos os pagamentos do pedido
-      const pagamentos = await database.getAllAsync<PagamentoRealizado>(
+      const pagamento = await database.getFirstAsync<PagamentoRealizado>(
         `
-          SELECT * FROM pagamentos_realizados WHERE pedido_handle = ?;
+          SELECT * FROM pagamentos_realizados 
+          WHERE pedido_handle = ? 
+          ORDER BY id DESC 
+          LIMIT 1;
         `,
         [pedido.Handle]
       );
-      if (!pagamentos || pagamentos.length === 0) {
-        console.warn("Nenhum pagamento encontrado.");
+
+      if (!pagamento) {
+        console.warn("Pagamento encontrado.");
         return null;
       }
       // Retorna o último elemento do array
-      return pagamentos[pagamentos.length - 1];
+      return pagamento;
     } catch (error) {
       console.error("❌ Erro ao buscar a última parcela:", error);
       throw error;

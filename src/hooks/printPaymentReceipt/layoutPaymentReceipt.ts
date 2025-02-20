@@ -8,7 +8,6 @@
 import { NativeModules, ToastAndroid } from "react-native";
 import { formatToCurrency } from "@/utils/formatToCurrency";
 import { dateFormatter } from "@/utils/dateFormatter";
-import { PagamentoRealizado } from "@/stores/useDetalhesPedidoStore";
 
 /** Tipo do item que será impresso */
 export type PrintItem = {
@@ -59,6 +58,8 @@ async function printPaymentReceipt(receipt: PagamentoRealizado): Promise<void> {
 
   // Rodapé
   layout.push(createTextItem(DIVIDER, "center", "medium"));
+  layout.push(createTextItem("Publisoft Informática LTDA", "center", "small"));
+  layout.push(createTextItem("www.publisoft.com.br", "center", "small"));
   layout.push(createTextItem("Obrigado!", "center", "big"));
 
   try {

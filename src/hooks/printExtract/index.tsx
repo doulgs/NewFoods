@@ -4,11 +4,10 @@
  */
 import { NativeModules, ToastAndroid } from "react-native";
 import { buildLayoutExtract } from "./layoutExtract";
-import { PagamentoRealizado, PedidoItensProps, PedidoProps } from "@/stores/useDetalhesPedidoStore";
 
 export interface DetalhesPedidoProps {
-  Pedido: PedidoProps;
-  PedidoItens: PedidoItensProps[];
+  Pedido: PedidoDetalhes;
+  PedidoItens: PedidoItem[];
   PagamentosRealizados?: PagamentoRealizado[];
 }
 

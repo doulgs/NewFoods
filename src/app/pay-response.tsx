@@ -1,9 +1,9 @@
 import { LoadingScreen } from "@/components/Loadings";
-import { printPaymentReceipt } from "@/hooks/printPaymentReceipt";
-import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
-import React, { useEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
 import { dbo_DetalhesPedido } from "@/database/schemas/dbo_DetalhesPedido";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
+import { printPaymentReceipt } from "@/hooks/printPaymentReceipt";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect } from "react";
 
 export default function PayResponse() {
   const { type } = useLocalSearchParams<{ type: "pending" | "finish" }>();
@@ -16,7 +16,8 @@ export default function PayResponse() {
 
     if (!ultimaParcelaInserida) return;
 
-    if (ultimaParcelaInserida.Atk === "DIN" || ultimaParcelaInserida.Atk === "") {
+    //console.log("ultimaParcelaInserida", ultimaParcelaInserida);
+    if (ultimaParcelaInserida.Atk === "DIN" || !ultimaParcelaInserida.Atk) {
       await printPaymentReceipt(ultimaParcelaInserida);
     }
     return null;
@@ -24,9 +25,8 @@ export default function PayResponse() {
 
   useEffect(() => {
     // Define o timeout de 1 minuto (60000 ms)
-    handlePrintReceipt();
-
     const timer = setTimeout(() => {
+      handlePrintReceipt();
       if (type === "finish") {
         navigationController.dismissTo("/panel-Main");
       } else {

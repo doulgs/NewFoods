@@ -1,8 +1,7 @@
-import { dateFormatter } from "@/utils/dateFormatter";
+import { dateFormatter, formatDateTime } from "@/utils/dateFormatter";
 import { formatToCurrency } from "@/utils/formatToCurrency";
 import { getDeviceInformation } from "@/utils/getDeviceInformation";
 import { DetalhesPedidoProps } from ".";
-import { PedidoItensProps } from "@/stores/useDetalhesPedidoStore";
 
 type PrintPedidoType = {
   type: string;
@@ -38,9 +37,9 @@ async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Pro
   printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
   printExtrato.push(
     criarTexto(
-      `${capitalizeFirstLetter(detalhes.Pedido.Tipo)}: ${detalhes.Pedido.Numero} - ${dateFormatter(
+      `${capitalizeFirstLetter(detalhes.Pedido.Tipo)}: ${detalhes.Pedido.Numero} - ${formatDateTime(
         detalhes.Pedido.Data,
-        "short"
+        "date"
       )}`,
       "center",
       "medium"
@@ -53,7 +52,7 @@ async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Pro
   // Corpo do extrato com os itens do pedido
 
   // Função para formatar as linhas dos itens do pedido
-  function formatarLinhaItens(item: PedidoItensProps): {
+  function formatarLinhaItens(item: PedidoItem): {
     descricao: string;
     info: string;
   } {

@@ -258,6 +258,8 @@ export default function PayOptions() {
           await insertPagamento(currentOrder, pagamentoRealizado);
         }
 
+        //console.log("payment", payment, "pagamentoRealizado", pagamentoRealizado);
+
         finishOrder({ tipo: isFinishOrder });
       } catch (error) {
         console.error("Erro ao registrar o pagamento:", error);
@@ -289,7 +291,7 @@ export default function PayOptions() {
           amount: pendingValue.toString(),
           cardholder_name: "",
           itk: "",
-          atk: "",
+          atk: "DIN",
           authorization_date_time: dataHoraAtual,
           brand: "",
           order_id: "",

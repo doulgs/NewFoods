@@ -50,7 +50,7 @@ export function CustomHeader({ back, navigation, options, route }: NativeStackHe
                 <MaterialCommunityIcons name="menu" size={26} color="#fff" />
               </TouchableOpacity>
             )}
-            {back && (
+            {back && route.name !== "panel-Main" && (
               <TouchableOpacity onPress={navigation.goBack} className="w-10">
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>

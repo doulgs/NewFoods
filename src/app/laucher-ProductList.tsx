@@ -1,3 +1,4 @@
+import { LoadingScreen } from "@/components/Loadings";
 import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
 import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { PedidoItem, usePedidoStore } from "@/storages/usePedidoStore";
@@ -34,6 +35,7 @@ export default function LaucherProductList() {
   const selectedItems = watch("selectedItems");
 
   const [sortOption, setSortOption] = useState("Codigo");
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Estado de carregamento
   const [incrementStep, setIncrementStep] = useState(1); // Opções Disponiveis "1" | "0.1" | "0.01" | "0.001"
 
   const infoPedido = usePedidoStore((state) => state.pedido);
@@ -102,53 +104,63 @@ export default function LaucherProductList() {
   };
 
   const handleConfirmItems = async () => {
-    const usuario = await getUsuario();
+    try {
+      setIsLoading(true);
+      const usuario = await getUsuario();
 
-    const itensSelecionados = Object.entries(selectedItems)
-      .map(([handle, quantidade]) => {
-        const produto = produtos.find((item) => item.Handle === Number(handle));
-        if (produto) {
-          return {
-            NumeroMesa: infoPedido.Numero,
-            NumeroMesaCartao: null,
-            NumeroCartao: null,
-            HandleMesa: null,
-            HandleCartao: null,
-            HandleGarcom: usuario.Handle || 11,
-            NomeGarcom: null,
-            HandleItem: produto.Handle,
-            HandleCombo: null,
-            Quantidade: quantidade,
-            QuantidadePessoas: infoPedido.QtdPessoasMesa ? infoPedido.QtdPessoasMesa : 1,
-            Valor: produto.Valor,
-            Total: quantidade * produto.Valor,
-            ListaExcecoes: [],
-            ListaExcecoesInt: null,
-            ListaComposicao: [],
-            HandleOrigem: null,
-            DescricaoItem: produto.Nome,
-            DescricaoExcecoes: null,
-            DescricaoComposicao: null,
-            NomeGrupo: "",
-            NomeSabor: "",
-            ObservacaoExcecao: "",
-            ObservacaoPedido: "",
-            DetalheItem: null,
-            HandlePessoa: null,
-            HandlePessoaComplemento: null,
-            PessoaNome: null,
-            ValorAcrescimo: 0.0,
-            ValorOutros: 0.0,
-            ValorDesconto: 0.0,
-          };
-        }
-        return null;
-      })
-      .filter((item) => item !== null);
+      const itensSelecionados = Object.entries(selectedItems)
+        .map(([handle, quantidade]) => {
+          const produto = produtos.find((item) => item.Handle === Number(handle));
+          if (produto) {
+            return {
+              NumeroMesa: infoPedido.Numero,
+              NumeroMesaCartao: null,
+              NumeroCartao: null,
+              HandleMesa: null,
+              HandleCartao: null,
+              HandleGarcom: usuario.Handle || 11,
+              NomeGarcom: null,
+              HandleItem: produto.Handle,
+              HandleCombo: null,
+              Quantidade: quantidade,
+              QuantidadePessoas: infoPedido.QtdPessoasMesa ? infoPedido.QtdPessoasMesa : 1,
+              Valor: produto.Valor,
+              Total: quantidade * produto.Valor,
+              ListaExcecoes: [],
+              ListaExcecoesInt: null,
+              ListaComposicao: [],
+              HandleOrigem: null,
+              DescricaoItem: produto.Nome,
+              DescricaoExcecoes: null,
+              DescricaoComposicao: null,
+              NomeGrupo: "",
+              NomeSabor: "",
+              ObservacaoExcecao: "",
+              ObservacaoPedido: "",
+              DetalheItem: null,
+              HandlePessoa: null,
+              HandlePessoaComplemento: null,
+              PessoaNome: null,
+              ValorAcrescimo: 0.0,
+              ValorOutros: 0.0,
+              ValorDesconto: 0.0,
+            };
+          }
+          return null;
+        })
+        .filter((item) => item !== null);
 
-    itensSelecionados.forEach((item) => addPedidoItem(item as Omit<PedidoItem, "id">));
-    navigationController.dismissTo("/laucher-OrderList");
+      itensSelecionados.forEach((item) => addPedidoItem(item as Omit<PedidoItem, "id">));
+      navigationController.dismissTo("/laucher-OrderList");
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoading) {
+    return <LoadingScreen msg="Carregando, aguarde um instante..." />;
+  }
 
   return (
     <View className="flex-1 bg-white">

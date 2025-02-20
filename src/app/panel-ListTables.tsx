@@ -1,9 +1,13 @@
 // stack/(tabs)/screenTable.tsx
 import { LoadingScreen } from "@/components/Loadings";
+import { dbo_Usuario } from "@/database/schemas/dbo_Usuario";
+import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
 import { fetchTables } from "@/services/Mesas/fetchTables";
 import { startTable } from "@/services/Mesas/startTable";
 import { fetchDetailOrder } from "@/services/Pedido/fetchDetailOrder";
+import { getDisponibilidadeMesaCartao } from "@/services/Status/getDisponibilidadeMesaCartao";
 import { usePedidoStore } from "@/storages/usePedidoStore";
+import { useRequestStore } from "@/storages/useRequestStore";
 import { useTempMesaCartao } from "@/storages/useTempMesaCartao";
 import { useFocusEffect } from "@react-navigation/native";
 import { clsx } from "clsx";
@@ -15,8 +19,13 @@ const REFRESH_INTERVAL = 30; // 30 segundos (em segundos) para o contador
 const NUM_COLUMNS = 3; // Número de colunas na FlatList
 
 export default function PanelListTables() {
-  const pStorege = usePedidoStore();
   const tmcStorege = useTempMesaCartao();
+
+  const { navigateToDetailPayment, navigateToOrderList } = useNavigationFoods();
+
+  const { getUsuario } = dbo_Usuario();
+  const { setRequestData, resetRequestStatus } = useRequestStore();
+  const { setPedido, clearPedido, clearSelectedPessoa } = usePedidoStore();
 
   const [isLoading, setIsLoading] = useState(true);
   // sortOption continuará com "Todas", "Ocupadas" e "Vazias"
@@ -72,7 +81,7 @@ export default function PanelListTables() {
               item.Status === "OCUPADA" || item.Status === "AGRUPADA_PRINCIPAL" || item.Status === "AGRUPADA_VAZIA",
           }
         )}
-        onPress={() => console.log(item.Numero)}
+        onPress={() => handleStartLaunch(item.Numero)}
       >
         <Text className="text-zinc-900 p-2 text-4xl font-extraBold">{item.Numero}</Text>
         <Text className="text-center text-zinc-700 text-xl font-extraBold absolute bottom-1">{item.Nome}</Text>
@@ -86,33 +95,32 @@ export default function PanelListTables() {
     );
   }, []);
 
-  /*   const handleStartLaunch = async (numeroMesa: string) => {
-    dpStorege.limparDetalhesPedido();
+  const handleStartLaunch = async (numercartao: string) => {
+    setIsLoading(true);
+    clearPedido();
+    clearSelectedPessoa();
+    resetRequestStatus();
+
+    const user = await getUsuario();
 
     if (!user) return;
 
     const handleGarcom = user.Handle;
-    const numero = Number(numeroMesa);
+    const numeroDigitado = Number(numercartao);
 
     try {
-      setIsLoading(true);
-      const detailOrder = await fetchDetailOrder({ handleGarcom, numero, tipo: "mesa" });
-      if (detailOrder?.IsValid && detailOrder.Data) {
-        dpStorege.setDetalhesPedido({ Pedido: detailOrder.Data.Pedido, PedidoItens: detailOrder.Data.Itens });
-        navigation.navigate("DetailPayment");
+      const disponibilidade = await getDisponibilidadeMesaCartao({ numero: numeroDigitado, tipo: "mesa" });
+
+      if (disponibilidade) {
+        await iniciarMesa(handleGarcom, numeroDigitado);
         return;
+      } else {
+        setRequestData(handleGarcom, numeroDigitado, "mesa");
+        navigateToDetailPayment();
+        setIsLoading(false);
       }
-
-      if (detailOrder?.Msg?.includes("Edição") && detailOrder.Data === null) {
-        return Alert.alert("Sistema", `${detailOrder.Msg}`);
-      }
-
-      await iniciarMesa(handleGarcom, numero);
     } catch (error) {
       console.error("Erro ao iniciar lançamento:", error);
-      Alert.alert("Erro", "Ocorreu um erro ao processar a solicitação. Tente novamente.", [{ text: "OK" }]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -126,17 +134,19 @@ export default function PanelListTables() {
       }
 
       if (tableStart?.IsValid && tableStart.Data) {
-        pStorege.setPedido({
+        setPedido({
           ...tableStart.Data,
           tipoLancamento: "mesa",
         });
-        navigation.navigate("OrderList");
+        navigateToOrderList();
       }
     } catch (error) {
       console.error("Erro ao iniciar mesa:", error);
       Alert.alert("Erro", "Não foi possível iniciar a mesa.", [{ text: "OK" }]);
+    } finally {
+      setIsLoading(false);
     }
-  }; */
+  };
 
   // Função para buscar as mesas e atualizar o store
   const getListTables = async () => {

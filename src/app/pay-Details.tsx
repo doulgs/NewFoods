@@ -1,24 +1,29 @@
-import React, { useCallback, useState } from "react";
-import { Alert, FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { CustomToggleButtons } from "@/components/Buttons/CustomToggleButtons";
 import { LoadingScreen } from "@/components/Loadings";
-import { formatToCurrency } from "@/utils/formatToCurrency";
 import { dbo_DetalhesPedido } from "@/database/schemas/dbo_DetalhesPedido";
-import { useFocusEffect } from "expo-router";
-import { formatDateTime } from "@/utils/dateFormatter";
+import { dbo_Global } from "@/database/schemas/dbo_Utils";
 import { useNavigationFoods } from "@/hooks/navigation/useNavegitionFoods";
-import { usePaymentCalculationStore } from "@/storages/usePaymentCalculationStore";
-import { useRequestStore } from "@/storages/useRequestStore";
-import { fetchDetailOrder } from "@/services/Pedido/fetchDetailOrder";
-import { startTable } from "@/services/Mesas/startTable";
+import { usePrinter } from "@/hooks/printExtract";
 import { startCard } from "@/services/Cartoes/startTable";
+import { startTable } from "@/services/Mesas/startTable";
+import { fetchDetailOrder } from "@/services/Pedido/fetchDetailOrder";
+import { usePaymentCalculationStore } from "@/storages/usePaymentCalculationStore";
 import { usePedidoStore } from "@/storages/usePedidoStore";
+import { useRequestStore } from "@/storages/useRequestStore";
+import { formatDateTime } from "@/utils/dateFormatter";
+import { formatToCurrency } from "@/utils/formatToCurrency";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { Alert, FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type RenderType = "payments" | "items" | "details";
 
 export default function PayDetails() {
   const { navigateToMainScreen, navigateToOptionsPayment, navigateToOrderList, navigationController } =
     useNavigationFoods();
+
+  const { getAllTablesDataAndLog } = dbo_Global();
+  const { printExtractText } = usePrinter();
 
   const { handleGarcom, numero, tipo } = useRequestStore();
   const { saveAndGetPedido } = dbo_DetalhesPedido();
@@ -265,6 +270,17 @@ export default function PayDetails() {
     [currentOrder]
   );
 
+  const handlePrintExtract = async () => {
+    if (!currentOrder) return;
+
+    const Pedido = currentOrder.Pedido;
+    const PedidoItens = currentOrder.Itens;
+
+    const detalhes = { Pedido, PedidoItens };
+
+    await printExtractText(detalhes);
+  };
+
   const handleStartPayment = () => {
     setPendingValue(valorPendente);
     setTotalAmountPaid(Math.max(0, valorTotal - valorPago));
@@ -416,13 +432,13 @@ export default function PayDetails() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="border rounded-lg p-2 bg-yellow-600" onPress={toggleIgnoreWaiterFee}>
+          <TouchableOpacity className="border rounded-lg p-2 bg-yellow-600" onPress={handlePrintExtract}>
             <Text className="text-lg px-4 font-semibold text-white">Realizar impressão do extrato</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="border rounded-lg p-2 bg-yellow-600 " onPress={toggleIgnoreWaiterFee}>
+          {/*           <TouchableOpacity className="border rounded-lg p-2 bg-yellow-600 " onPress={toggleIgnoreWaiterFee}>
             <Text className="text-lg px-4 font-semibold text-white">Alterar quantidade de Pessoas</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       )}
     </>

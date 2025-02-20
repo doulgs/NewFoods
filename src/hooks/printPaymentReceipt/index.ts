@@ -7,9 +7,7 @@
 
 import { NativeModules, ToastAndroid } from "react-native";
 import { formatToCurrency } from "@/utils/formatToCurrency";
-import { formatDateTime } from "@/utils/dateFormatter";
-import { PagamentoRealizado } from "@/stores/useDetalhesPedidoStore";
-import { PaymentProps } from "@/stores/useCondicoesPagamentoStore";
+import { formatDateTime, dateFormatter } from "@/utils/dateFormatter";
 
 /** Tipo do item que será impresso */
 export type PrintItem = {
@@ -41,7 +39,7 @@ const DIVIDER = "--------------------------------";
  *
  * @param receipt - Dados do extrato de pagamento.
  */
-async function printPaymentReceipt(receipt: PaymentProps): Promise<void> {
+async function printPaymentReceipt(receipt: PagamentoRealizado): Promise<void> {
   const { PrinterModule } = NativeModules;
   const layout: PrintItem[] = [];
 
@@ -50,9 +48,9 @@ async function printPaymentReceipt(receipt: PaymentProps): Promise<void> {
   layout.push(createTextItem(DIVIDER, "center", "medium"));
 
   // Detalhes do pagamento
-  layout.push(createTextItem(`Método: ${receipt.DescricaoCondicaoPagamento}`, "left", "medium"));
-  layout.push(createTextItem(`Data: ${formatDateTime(receipt.Data, "short")}`, "left", "medium"));
-  layout.push(createTextItem(`Valor: ${formatToCurrency(receipt.ValorPagamento)}`, "left", "medium"));
+  layout.push(createTextItem(`Método: ${receipt.DescricaoCondicao}`, "left", "medium"));
+  layout.push(createTextItem(`Data: ${dateFormatter(receipt.DataHora, "short")}`, "left", "medium"));
+  layout.push(createTextItem(`Valor: ${formatToCurrency(receipt.ValorPago)}`, "left", "medium"));
   if (receipt.ValorTroco) {
     layout.push(createTextItem(`Troco: ${formatToCurrency(receipt.ValorTroco)}`, "left", "medium"));
   }
