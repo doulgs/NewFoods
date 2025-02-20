@@ -1,4 +1,4 @@
-import { dateFormatter, formatDateTime } from "@/utils/dateFormatter";
+import { formatDateTime } from "@/utils/dateFormatter";
 import { formatToCurrency } from "@/utils/formatToCurrency";
 import { getDeviceInformation } from "@/utils/getDeviceInformation";
 import { DetalhesPedidoProps } from ".";
@@ -14,6 +14,132 @@ const capitalizeFirstLetter = (text: string) => {
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
+
+async function buildLayoutExtract_default(data: DetalhesPedidoProps): Promise<PrintPedidoType[]> {
+  const printExtrato: PrintPedidoType[] = [];
+
+  // Função para ajustar o tamanho da string com preenchimento
+  function ajustarTamanhoString(string: string, tamanho: number, preenchimento: string = " "): string {
+    return string.length > tamanho ? string.substring(0, tamanho) : string.padEnd(tamanho, preenchimento);
+  }
+
+  // Função para criar o objeto de texto para o extrato
+  function criarTexto(text: string, align: string, size: string) {
+    // Adiciona o comando de nova linha ao final do texto
+    const textWithEndOfLine = `${text}\n\r`;
+    return { type: "text", content: textWithEndOfLine, align, size };
+  }
+
+  // Função para formatar as linhas dos itens do pedido
+  function formatarLinhaItens(item: PedidoItem): { descricao: string; info: string } {
+    const descricao = item.DescricaoItem.slice(0, 27);
+    const quantidade = ajustarTamanhoString(`${item.Quantidade.toString()}x`, 7, " ");
+    const valor = ajustarTamanhoString(formatToCurrency(item.Total), 10, " ");
+    const total = ajustarTamanhoString(formatToCurrency(item.Total / item.Quantidade), 10, " ");
+    const info = `${quantidade} ${valor} ${total}`;
+    return { descricao, info };
+  }
+
+  // Cabeçalho do extrato
+  printExtrato.push(criarTexto(data.Pedido.FilialNome, "center", "medium"));
+  printExtrato.push(criarTexto(data.Pedido.FilialEndereco, "center", "medium"));
+  printExtrato.push(criarTexto(data.Pedido.FilialFone, "center", "medium"));
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+  printExtrato.push(
+    criarTexto(
+      `${capitalizeFirstLetter(data.Pedido.Tipo)}: ${data.Pedido.Numero} - ${formatDateTime(data.Pedido.Data, "date")}`,
+      "center",
+      "medium"
+    )
+  );
+  printExtrato.push(criarTexto("------------------------------------------------------", "center", "medium"));
+  printExtrato.push(
+    criarTexto(`${ajustarTamanhoString("Descrição", 33, " ")} Qtd | Valor | Total`, "center", "medium")
+  );
+  printExtrato.push(criarTexto("------------------------------------------------------", "center", "medium"));
+
+  // Corpo do extrato com os itens do pedido
+  for (const item of data.PedidoItens) {
+    const { descricao, info } = formatarLinhaItens(item);
+    printExtrato.push(criarTexto(descricao, "left", "medium"));
+    printExtrato.push(criarTexto(info, "right", "medium"));
+  }
+
+  // Rodapé do extrato com as formas de pagamento
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+  const valorTotalPedido = formatToCurrency(data.Pedido.Total);
+  printExtrato.push(criarTexto(`Total do Pedido: ${valorTotalPedido}`, "right", "medium"));
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+  printExtrato.push(criarTexto("Sem Valor Fiscal/Peça Nota Fiscal", "center", "small"));
+  printExtrato.push(criarTexto("Publisoft Informática LTDA", "center", "small"));
+  printExtrato.push(criarTexto("www.publisoft.com.br", "center", "small"));
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+
+  return printExtrato;
+}
+
+async function buildLayoutExtract_modelo_L3(data: DetalhesPedidoProps): Promise<PrintPedidoType[]> {
+  const printExtrato: PrintPedidoType[] = [];
+
+  // Função para ajustar o tamanho da string com preenchimento
+  function ajustarTamanhoString(string: string, tamanho: number, preenchimento: string = " "): string {
+    return string.length > tamanho ? string.substring(0, tamanho) : string.padEnd(tamanho, preenchimento);
+  }
+
+  // Função para criar o objeto de texto para o extrato
+  function criarTexto(text: string, align: string, size: string) {
+    // Adiciona o comando de nova linha ao final do texto
+    const textWithEndOfLine = `${text}\n\r`;
+    return { type: "text", content: textWithEndOfLine, align, size };
+  }
+
+  // Função para formatar as linhas dos itens do pedido
+  function formatarLinhaItens(item: PedidoItem): { descricao: string; info: string } {
+    const descricao = item.DescricaoItem.slice(0, 27);
+    const quantidade = ajustarTamanhoString(`${item.Quantidade.toString()}x`, 7, " ");
+    const valor = ajustarTamanhoString(formatToCurrency(item.Total), 10, " ");
+    const total = ajustarTamanhoString(formatToCurrency(item.Total / item.Quantidade), 10, " ");
+    const info = `${quantidade} ${valor} ${total}`;
+    return { descricao, info };
+  }
+
+  // Cabeçalho do extrato
+  printExtrato.push(criarTexto(data.Pedido.FilialNome, "center", "medium"));
+  printExtrato.push(criarTexto(data.Pedido.FilialEndereco, "center", "medium"));
+  printExtrato.push(criarTexto(data.Pedido.FilialFone, "center", "medium"));
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+  printExtrato.push(
+    criarTexto(
+      `${capitalizeFirstLetter(data.Pedido.Tipo)}: ${data.Pedido.Numero} - ${formatDateTime(data.Pedido.Data, "date")}`,
+      "center",
+      "medium"
+    )
+  );
+  printExtrato.push(criarTexto("------------------------------------------------------", "center", "medium"));
+  printExtrato.push(
+    criarTexto(`${ajustarTamanhoString("Descrição", 33, " ")} Qtd | Valor | Total`, "center", "medium")
+  );
+  printExtrato.push(criarTexto("------------------------------------------------------", "center", "medium"));
+
+  // Corpo do extrato com os itens do pedido
+  for (const item of data.PedidoItens) {
+    const { descricao, info } = formatarLinhaItens(item);
+    printExtrato.push(criarTexto(descricao, "left", "medium"));
+    printExtrato.push(criarTexto(info, "right", "medium"));
+  }
+
+  // Rodapé do extrato com as formas de pagamento
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+  const valorTotalPedido = formatToCurrency(data.Pedido.Total);
+  printExtrato.push(criarTexto(`Total do Pedido: ${valorTotalPedido}`, "right", "medium"));
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+  printExtrato.push(criarTexto("Sem Valor Fiscal/Peça Nota Fiscal", "center", "small"));
+  printExtrato.push(criarTexto("Publisoft Informática LTDA", "center", "small"));
+  printExtrato.push(criarTexto("www.publisoft.com.br", "center", "small"));
+  printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
+
+  return printExtrato;
+}
 
 async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Promise<PrintPedidoType[]> {
   const printExtrato: PrintPedidoType[] = [];
@@ -49,13 +175,9 @@ async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Pro
   printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
   printExtrato.push(criarTexto(`${ajustarTamanhoString("Descrição", 12, " ")}Qtd | Valor | Total`, "center", "medium"));
   printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
-  // Corpo do extrato com os itens do pedido
 
-  // Função para formatar as linhas dos itens do pedido
-  function formatarLinhaItens(item: PedidoItem): {
-    descricao: string;
-    info: string;
-  } {
+  // Corpo do extrato com os itens do pedido
+  function formatarLinhaItens(item: PedidoItem): { descricao: string; info: string } {
     const descricao = item.DescricaoItem.slice(0, 27);
     const quantidade = ajustarTamanhoString(`${item.Quantidade.toString()}x`, 7, " ");
     const valor = ajustarTamanhoString(formatToCurrency(item.Valor), 10, " ");
@@ -63,7 +185,6 @@ async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Pro
     const info = `${quantidade} ${valor} ${total}`;
     return { descricao, info };
   }
-
   for (const item of detalhes.PedidoItens) {
     const { descricao, info } = formatarLinhaItens(item);
     printExtrato.push(criarTexto(descricao, "left", "medium"));
@@ -75,7 +196,6 @@ async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Pro
   printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
   const valorTotalPedido = formatToCurrency(detalhes.Pedido.Total);
   printExtrato.push(criarTexto(`Total do Pedido: ${valorTotalPedido}`, "right", "medium"));
-
   printExtrato.push(criarTexto("--------------------------------", "center", "medium"));
   printExtrato.push(criarTexto("Sem Valor Fiscal/Peça Nota Fiscal", "center", "small"));
   printExtrato.push(criarTexto("Publisoft Informática LTDA", "center", "small"));
@@ -86,6 +206,18 @@ async function buildLayoutExtract_modelo_P2B(detalhes: DetalhesPedidoProps): Pro
 }
 
 // Função principal para construir o layout do extrato do pedido
-export async function buildLayoutExtract(detalhes: DetalhesPedidoProps): Promise<PrintPedidoType[]> {
-  return await buildLayoutExtract_modelo_P2B(detalhes);
+export async function buildLayoutExtract(data: DetalhesPedidoProps): Promise<PrintPedidoType[]> {
+  const dispositivo = await getDeviceInformation();
+
+  if (dispositivo.infoDispositivo?.Modelo === "P2-B") {
+    console.log("Usando relatório para P2B");
+    return await buildLayoutExtract_modelo_P2B(data);
+  }
+
+  if (dispositivo.infoDispositivo?.Modelo === "L3") {
+    console.log("Usando relatório para L3");
+    return await buildLayoutExtract_modelo_L3(data);
+  }
+
+  return await buildLayoutExtract_default(data);
 }
