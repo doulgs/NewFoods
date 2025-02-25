@@ -6,7 +6,8 @@ import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 
 export default function PayResponse() {
-  const { type } = useLocalSearchParams<{ type: "pending" | "finish" }>();
+  const { type = "voltar" } = useLocalSearchParams<{ type?: "voltar" | "pending" | "finish" }>();
+
   const { navigationController, navigateToMainScreen } = useNavigationFoods();
 
   const { getUltimaParcela } = dbo_DetalhesPedido();
@@ -24,13 +25,20 @@ export default function PayResponse() {
   };
 
   useEffect(() => {
+    if (type === "voltar") {
+      navigationController.back();
+      return;
+    }
     // Define o timeout de 1 minuto (60000 ms)
     const timer = setTimeout(() => {
       handlePrintReceipt();
+
       if (type === "finish") {
         navigationController.dismissTo("/panel-Main");
+        return;
       } else {
         navigationController.dismissTo("/pay-Details");
+        return;
       }
     }, 5000);
 

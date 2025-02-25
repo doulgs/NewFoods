@@ -14,7 +14,7 @@ const useNavigationFoods = () => {
   const navigateToLogin = ({ reset = false }: { reset?: boolean } = {}) => {
     if (reset) {
       // Substitui a tela anterior, impedindo voltar
-      console.log("Resetando a navegação");
+      //console.log("Resetando a navegação");
       navigationController.replace("/");
       return;
     } else {
@@ -28,7 +28,7 @@ const useNavigationFoods = () => {
   const navigateToMainScreen = ({ reset = false }: { reset?: boolean } = {}) => {
     if (reset) {
       // Substitui a tela anterior, impedindo voltar
-      console.log("Resetando a navegação");
+      //console.log("Resetando a navegação");
       navigationController.replace("/panel-Main");
       return;
     } else {
@@ -93,7 +93,7 @@ const useNavigationFoods = () => {
    *
    * @param type - "pending" para processando ou "finish" para finalizado.
    */
-  const navigateToProcessingPayment = (type: "pending" | "finish") =>
+  const navigateToProcessingPayment = (type: "voltar" | "pending" | "finish") =>
     navigationController.push({ pathname: "/pay-response", params: { type } });
 
   const navigateToCancelPayment = (handlePayment: string) =>

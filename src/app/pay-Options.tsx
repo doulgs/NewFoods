@@ -262,6 +262,7 @@ export default function PayOptions() {
 
         finishOrder({ tipo: isFinishOrder });
       } catch (error) {
+        setIsLoading(false);
         console.error("Erro ao registrar o pagamento:", error);
         Alert.alert("Erro", "Falha ao registrar o pagamento. Tente novamente.");
       }
@@ -278,6 +279,7 @@ export default function PayOptions() {
           transactionType: selected.CodigoIntegracaoPagamento,
         });
       } catch (error) {
+        setIsLoading(false);
         console.error("Erro ao iniciar pagamento:", error);
       }
     },
@@ -286,30 +288,37 @@ export default function PayOptions() {
 
   const processSelectedCondition = useCallback(
     (selected: CondicaoPagamento) => {
-      if (selected.CodigoIntegracaoPagamento === "DIN") {
-        const defaultParams: DeepLinkUrlParams = {
-          amount: pendingValue.toString(),
-          cardholder_name: "",
-          itk: "",
-          atk: "DIN",
-          authorization_date_time: dataHoraAtual,
-          brand: "",
-          order_id: "",
-          authorization_code: "",
-          installment_count: "0",
-          pan: "",
-          type: selected.CodigoIntegracaoPagamento,
-          entry_mode: "",
-          account_id: "",
-          customer_wallet_provider_id: "",
-          code: "0", // Força o código 0 para simular deep link
-          success: "true",
-          transaction_qualifier: "",
-          message: "Pagamento DIN processado manualmente",
-        };
-        recordPayment(defaultParams);
-      } else {
-        startPaymentProcess(selected);
+      try {
+        setIsLoading(true);
+        if (selected.CodigoIntegracaoPagamento === "DIN") {
+          const defaultParams: DeepLinkUrlParams = {
+            amount: pendingValue.toString(),
+            cardholder_name: "",
+            itk: "",
+            atk: "DIN",
+            authorization_date_time: dataHoraAtual,
+            brand: "",
+            order_id: "",
+            authorization_code: "",
+            installment_count: "0",
+            pan: "",
+            type: selected.CodigoIntegracaoPagamento,
+            entry_mode: "",
+            account_id: "",
+            customer_wallet_provider_id: "",
+            code: "0", // Força o código 0 para simular deep link
+            success: "true",
+            transaction_qualifier: "",
+            message: "Pagamento DIN processado manualmente",
+          };
+          recordPayment(defaultParams);
+        } else {
+          startPaymentProcess(selected);
+        }
+      } catch (error) {
+        console.error("Erro ao processar condição de pagamento:", error);
+        Alert.alert("Erro", "Falha ao processar a condição de pagamento. Tente novamente.");
+        setIsLoading(false);
       }
     },
     [pendingValue, dataHoraAtual, recordPayment, startPaymentProcess]
@@ -329,11 +338,13 @@ export default function PayOptions() {
       const { queryParams } = Linking.parse(event.url);
       const typedParams = parseDeepLinkParams(queryParams ?? {});
       if (typedParams.code === "0") {
-        console.log("Código recebido é 0. Processando pagamento...", typedParams);
+        //console.log("Código recebido é 0. Processando pagamento...", typedParams);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         await recordPayment(typedParams);
       } else {
         console.log("Deep link recebido com código diferente de 0.", typedParams);
         Alert.alert("Sistema", typedParams.message || "Erro ao processar o deep link.");
+        setIsLoading(false);
       }
     },
     [recordPayment]

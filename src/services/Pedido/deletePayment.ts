@@ -61,7 +61,7 @@ async function DeletePayment({ HandlePedido, Handle, TipoPagamento }: RequestPro
     // Envio da requisição para exclusão de pagamento
     const response = await API.post<ResponseProps[]>(`/api/Pagamento/Excluir`, paymentData);
 
-    console.log("DeletePayment", response.data);
+    //console.log("DeletePayment", response.data);
 
     // Retorna apenas o primeiro objeto do array
     const firstResponse = response.data[0];
