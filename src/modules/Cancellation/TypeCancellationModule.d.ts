@@ -1,3 +1,10 @@
+type RequestNativeCancellation = {
+  amount: number;
+  atk: string;
+  editableAmount: boolean;
+  return_scheme: string;
+};
+
 type NativeCancellation = {
   amount: string;
   atk: string;

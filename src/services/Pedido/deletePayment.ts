@@ -2,23 +2,23 @@ import { useApiSettings } from "@/services/api";
 import { handleAPIError } from "../handleAPIError";
 
 // Tipagens das propriedades
-export type PaymentProps = {
+type PaymentProps = {
   Handle: number; // Alterado para "Handle" para coincidir com o payload necessário
   TipoPagamento: string;
 };
 
-export type RequiredProps = {
+type RequiredProps = {
   HandlePedido: number;
   ListaPagamento: PaymentProps[];
 };
 
-export type ResponseProps = {
+type ResponseProps = {
   IsValid: boolean;
   Msg: string;
   Data: null;
 };
 
-export type RequestProps = {
+type RequestProps = {
   HandlePedido: number;
   Handle: number; // Alterado para "Handle"
   TipoPagamento: string;
@@ -60,6 +60,8 @@ async function DeletePayment({ HandlePedido, Handle, TipoPagamento }: RequestPro
 
     // Envio da requisição para exclusão de pagamento
     const response = await API.post<ResponseProps[]>(`/api/Pagamento/Excluir`, paymentData);
+
+    console.log("DeletePayment", response.data);
 
     // Retorna apenas o primeiro objeto do array
     const firstResponse = response.data[0];

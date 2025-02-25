@@ -89,6 +89,7 @@ export default function Index() {
       // Atualiza a URL do serviço via AsyncStorage
       await useUrlApiStore.getState().getUrl();
       const { url } = useUrlApiStore.getState();
+
       if (!url) {
         Alert.alert("Sistema", "Não foi possível identificar a URL do serviço. Verifique a configuração da API");
         navigateToRegister();
@@ -96,7 +97,6 @@ export default function Index() {
       }
 
       const config = await fetchConfig();
-      console.log(config);
       if (!config) {
         Alert.alert("Sistema", "Não foi possível buscar as configurações. Verifique a conexão com a internet");
         return;

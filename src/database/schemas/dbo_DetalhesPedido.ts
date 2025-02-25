@@ -343,11 +343,30 @@ export function dbo_DetalhesPedido() {
     }
   }
 
+  // 🔹 Retorna uma parcela baseado no handle informado.
+  async function getPagamentoByHandle(handle_pagemnto: string): Promise<PagamentoRealizado | null> {
+    try {
+      const pagamento = await database.getFirstAsync<PagamentoRealizado>(
+        `SELECT * FROM pagamentos_realizados WHERE Handle = ? LIMIT 1;`,
+        [handle_pagemnto]
+      );
+      if (!pagamento) {
+        console.warn(`Nenhum pagamento encontrado com o handle ${handle_pagemnto}.`);
+        return null;
+      }
+      return pagamento;
+    } catch (error) {
+      console.error(`❌ Erro ao buscar pagamento com handle ${handle_pagemnto}:`, error);
+      throw error;
+    }
+  }
+
   return {
     saveAndGetPedido,
     insertPedido,
     getPedido,
     insertPagamento,
     getUltimaParcela,
+    getPagamentoByHandle,
   };
 }

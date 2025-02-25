@@ -96,6 +96,9 @@ const useNavigationFoods = () => {
   const navigateToProcessingPayment = (type: "pending" | "finish") =>
     navigationController.push({ pathname: "/pay-response", params: { type } });
 
+  const navigateToCancelPayment = (handlePayment: string) =>
+    navigationController.push({ pathname: "/cancel", params: { handlePayment } });
+
   return {
     navigationController,
     // Autenticação
@@ -122,6 +125,7 @@ const useNavigationFoods = () => {
     navigateToDetailPayment,
     navigateToOptionsPayment,
     navigateToProcessingPayment,
+    navigateToCancelPayment,
   };
 };
 

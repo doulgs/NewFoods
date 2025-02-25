@@ -279,7 +279,7 @@ export default function LaucherProductList() {
       />
       <View className="p-3 bg-primary-800 items-end">
         <TouchableOpacity className="border rounded-lg p-2 bg-yellow-600" onPress={handleSubmit(handleConfirmItems)}>
-          <Text className="text-lg px-4 font-semibold text-white">Salvar Pedido</Text>
+          <Text className="text-lg px-4 font-semibold text-white">Confirmar Itens</Text>
         </TouchableOpacity>
       </View>
     </View>

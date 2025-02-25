@@ -85,6 +85,7 @@ export default function Layout() {
               <Stack.Screen name="pay-Details" options={{ title: "Detalhes do Pedido" }} />
               <Stack.Screen name="pay-Options" options={{ title: "Pagamento" }} />
               <Stack.Screen name="pay-response" options={{ headerShown: false }} />
+              <Stack.Screen name="cancel" options={{ title: "Detalhes" }} />
 
               <Stack.Screen name="person-Register" options={{ title: "Lista de Pessoas" }} />
               <Stack.Screen name="person-Edit" options={{ title: "Editar Pessoa" }} />

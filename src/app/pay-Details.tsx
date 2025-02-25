@@ -12,15 +12,22 @@ import { usePedidoStore } from "@/storages/usePedidoStore";
 import { useRequestStore } from "@/storages/useRequestStore";
 import { formatDateTime } from "@/utils/dateFormatter";
 import { formatToCurrency } from "@/utils/formatToCurrency";
+import { Octicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { Alert, FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 
 type RenderType = "payments" | "items" | "details";
 
 export default function PayDetails() {
-  const { navigateToMainScreen, navigateToOptionsPayment, navigateToOrderList, navigationController } =
-    useNavigationFoods();
+  const {
+    navigateToMainScreen,
+    navigateToOptionsPayment,
+    navigateToOrderList,
+    navigateToCancelPayment,
+    navigationController,
+  } = useNavigationFoods();
 
   const { getAllTablesDataAndLog } = dbo_Global();
   const { printExtractText } = usePrinter();
@@ -115,28 +122,46 @@ export default function PayDetails() {
 
   const { valorTotal, valorPago, valorPendente } = calculateTotals();
 
-  const renderPayments = useCallback(
-    ({ item }: { item: PagamentoRealizado }) => (
-      <View className="bg-white border-b border-zinc-400 p-4 mb-2">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-lg font-extraBold">Parcela</Text>
-          <Text className="text-sm font-extraBold">{formatDateTime(item.DataHora, "short")}</Text>
-          <Text className="text-lg font-extraBold">Valor</Text>
-        </View>
-        <View className="flex-row items-start justify-between pl-2">
-          <Text className="text-md font-medium">{item.DescricaoCondicao}</Text>
-          <Text className="text-md font-medium">{formatToCurrency(item.ValorPago)}</Text>
-        </View>
-        {item.ValorTroco !== 0 && (
-          <View className="flex-row items-center justify-between border-t-hairline py-2 my-2">
-            <Text className="text-md font-bold">Valor do troco:</Text>
-            <Text className="text-md font-medium">{formatToCurrency(item.ValorTroco)}</Text>
+  // Finalizar a exclusao da parcela
+  const handleDeletePayment = async (item: PagamentoRealizado) => {
+    navigateToCancelPayment(item.Handle.toString());
+    return;
+  };
+
+  const renderPayments = useCallback(({ item }: { item: PagamentoRealizado }) => {
+    // Função que renderiza a ação à direita (por exemplo, um botão de ação)
+    const renderRightActions = () => (
+      <TouchableOpacity
+        onPress={() => handleDeletePayment(item)}
+        className="bg-white border-b border-l justify-center items-center w-20 border-zinc-400 p-4"
+      >
+        <Octicons name="trash" size={24} color="#000" />
+        <Text className="text-sm font-extraBold">Excluir</Text>
+      </TouchableOpacity>
+    );
+
+    return (
+      <Swipeable renderRightActions={renderRightActions}>
+        <View className="bg-white border-b border-zinc-400 p-4">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-lg font-extraBold">Parcela</Text>
+            <Text className="text-sm font-extraBold">{formatDateTime(item.DataHora, "short")}</Text>
+            <Text className="text-lg font-extraBold">Valor</Text>
           </View>
-        )}
-      </View>
-    ),
-    []
-  );
+          <View className="flex-row items-start justify-between pl-2">
+            <Text className="text-md font-medium">{item.DescricaoCondicao}</Text>
+            <Text className="text-md font-medium">{formatToCurrency(item.ValorPago)}</Text>
+          </View>
+          {item.ValorTroco !== 0 && (
+            <View className="flex-row items-center justify-between border-t-hairline py-2 my-2">
+              <Text className="text-md font-bold">Valor do troco:</Text>
+              <Text className="text-md font-medium">{formatToCurrency(item.ValorTroco)}</Text>
+            </View>
+          )}
+        </View>
+      </Swipeable>
+    );
+  }, []);
 
   const renderItems = useCallback(
     ({ item }: { item: PedidoItem }) => (
